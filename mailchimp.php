@@ -114,7 +114,7 @@ class MailChimp
 	 * @param	string $method					What are you requesting?
 	 * @param	array[optional] $parameters		The parameters of your request.
 	 */
-	private function doCall($method, array $parameters = array())
+	public function doCall($method, array $parameters = array())
 	{
 		// standard dataCenter
 		$dataCenter = 'us1';
@@ -135,10 +135,12 @@ class MailChimp
 		$callURL = $apiURL['scheme'] . '://' . $dataCenter . '.' . $apiURL['host'] . $apiURL['path'] . '?';
 
 		// the querystring
-		$queryString = 'output=php&method=' . $method;
+		// $queryString = 'output=php&method=' . $method; (old version)
+		$queryString = 'output=php&method=' . $method . '&';
 
 		// any parameters given?
-		if(!empty($parameters)) $queryString.= $this->buildQueryString($parameters);
+		// if(!empty($parameters)) $queryString.= $this->buildQueryString($parameters); (old version)
+		if(!empty($parameters)) $queryString.= http_build_query($parameters);
 
 		$callURL.= $queryString;
 
@@ -250,6 +252,18 @@ class MailChimp
 		return $this->apiURL;
 	}
 
+	/**
+	 * This updates a member
+	 * @return	string
+	 */
+	public function listUpdateMember($email, $list, array $merge_vars) {
+	    $params = array();
+	    $params['id'] = $list;
+	    $params['email_address'] = $email;
+	    $params['merge_vars'] = $merge_vars;
+	    return $this->doCall('listUpdateMember', $params);
+	}
+
 
 	/**
 	 * This sets the API Key
@@ -303,7 +317,6 @@ class MailChimp
 		// parse it as an URL, to get more info
 		$this->apiURL = parse_url($tmpURL);
 	}
-
 
 	/**
 	 * This subscribes an email to a list
